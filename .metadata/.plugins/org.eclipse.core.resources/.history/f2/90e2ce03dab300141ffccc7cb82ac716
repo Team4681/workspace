@@ -1,0 +1,14 @@
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.PIDOutput;
+
+public class PIDConstant implements PIDOutput {
+	double constant = 1.0;
+	public PIDConstant(double c){
+		constant = c;
+	}
+
+	public void pidWrite(double value) {
+		constant = value;		
+	}
+}

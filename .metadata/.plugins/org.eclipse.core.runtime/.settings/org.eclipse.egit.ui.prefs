@@ -1,0 +1,2 @@
+commit_dialog_history_messages=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<messages>\r\n<message>Elevator PID tuned.</message>\r\n<message>Added Joy1 button 8 as PID enable/disable</message>\r\n<message>Moved driving to its own class. Began work on PID drive</message>\r\n<message>FIRST COMMIT WOOO</message>\r\n</messages>
+eclipse.preferences.version=1

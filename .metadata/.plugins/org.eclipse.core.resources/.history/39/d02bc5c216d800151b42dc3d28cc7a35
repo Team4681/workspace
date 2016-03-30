@@ -1,0 +1,65 @@
+
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.IterativeRobot;
+
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the IterativeRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the manifest file in the resource
+ * directory.
+ */
+public class Robot extends IterativeRobot {
+    /**
+     * This function is run when the robot is first started up and should be
+     * used for any initialization code.
+     */
+	
+	//inputs and output classes
+	private Drive move;
+	private Shooter shoot;
+	private Loader load;
+	private Joystick joy1;
+	private Joystick joy2;
+	
+	
+    public void robotInit() {
+    	//defining inputs and outputs upon startup
+    	move = new Drive();
+    	joy1 = new Joystick(0);
+    	joy2 = new Joystick(1);
+    	shoot = new Shooter();
+    	load = new Loader();
+    }
+
+    /**
+     * This function is called periodically during autonomous
+     */
+    public void autonomousPeriodic() {
+
+    }
+
+    /**
+     * This function is called periodically during operator control
+     */
+    public void teleopPeriodic() {
+    	//tell robot to move
+        move.drive(joy1.getY(), -joy2.getY());
+        //if trigg is pressed, shoot
+        shoot.projectileLaunch(joy1.getTrigger());
+        //if but3, load in, if but 2, push out
+        load.utilizeCentrifugalForce(joy1.getRawButton(3),joy1.getRawButton(2));
+        //does some preset motions
+        move.preset(joy2.getRawButton(2), joy2.getRawButton(4), joy2.getRawButton(5));
+        }
+    
+    /**
+     * This function is called periodically during test mode
+     */
+    public void testPeriodic() {
+    
+    }
+    
+}

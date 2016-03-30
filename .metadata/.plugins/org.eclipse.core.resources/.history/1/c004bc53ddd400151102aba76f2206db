@@ -1,0 +1,45 @@
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+
+public class Loader {
+	//init motor controller
+	private Victor bar;
+	
+	//constructor
+	public Loader(){
+		bar = new Victor(2);
+	}
+	
+	/*if b1 is pressed, load in
+	if b2 is pressed, push out*/
+		public void utilizeCentrifugalForce(boolean b1, boolean b2){
+		if(b1){
+			bar.set(.75);
+		}
+		if(b2){
+			bar.set(-.75);
+		}
+		if(!b1 && !b2){
+			bar.set(0);
+		}
+	}
+	
+	//load in for set time
+	public void loadIn(double time){
+		bar.set(.75);
+		for(double i =0; i < time; i += .05){
+			Timer.delay(.05);
+		}
+		bar.set(0);
+	}
+	
+	//push out for set time
+	public void loadOut(double time){
+		bar.set(-.75);
+		for(double i =0; i < time; i += .05){
+			Timer.delay(.05);
+		}
+		bar.set(0);
+	}
+}

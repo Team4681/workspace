@@ -1,0 +1,118 @@
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+
+public class Drive {
+	//define motor controllers
+	private Victor left;
+	private Victor right;
+	
+	//variable to contain inputs (cuz screw calling joy.getX() every time)
+	private double xl;	//x of the left joy
+	private double xr;	//x of the right
+	
+	//constructor and init things in appropiate controller
+	public Drive(int ctrler0, int ctrler1){
+		left = new Victor(ctrler0); //was 0
+		right = new Victor(ctrler1); //was 1
+	}
+	
+	/*special function to allow better control of robot
+	basically squares the input (making it a smaller number b/c it is a decimal) while keeping sign
+	also creates a dead zone so it is not constantly jerking (magic square method)*/
+	private double adjust(double in){
+		if(in > .05){
+			if(in > 1) return 1;
+			return in*in;
+		} else if(in < -.05){
+			if(in < -1) return -1;
+			return -(in*in);
+		} else {
+			return 0;
+		}
+	}
+	
+	//let's go places!
+	//drives the robot
+	public void drive(double Left, double Right){
+		xl = Left;
+		xr = -Right;
+		
+		//set motors to go at adjusted speed
+		left.set(adjust(xl));
+		right.set(adjust(xr));
+	}
+	
+	//single joy-stick drive
+	public void altDrive(double x, double y){
+		left.set(adjust(y-x));
+		right.set(adjust(y+x));
+	}
+	
+	//automanous drive 
+	public void autoDrive(double speed){
+		xl = -speed;
+		xr = speed;
+		
+		left.set(xl);
+		right.set(xr);
+	}
+	
+	//turns the robot x degrees, positive to left
+	public void turn(int angle){
+		double percent = angle/180;
+		//time to turn 180;
+		double time = 1;
+		double turnTime = percent*time;
+		
+		left.set(-.75);
+		right.set(-.75);
+		Timer.delay(turnTime);
+		left.set(0);
+		right.set(0);
+	}
+	
+	//use preset motions
+	public void preset(boolean b1, boolean b2, boolean b3){
+		if(b1) turn180l();
+		if(b2) turnr();
+		if(b3) turnl();
+		//if(b4) turn180r();
+		}
+	
+	/*helpful presets, time needs to be adjusted
+	quarter turn left*/
+	public void turnl(){
+		left.set(-.75);
+		right.set(-.75);
+		Timer.delay(.5);
+		left.set(0);
+		right.set(0);
+	}
+	//quarter turn right
+	public void turnr(){
+		left.set(.75);
+		right.set(.75);
+		Timer.delay(.5);
+		left.set(0);
+		right.set(0);
+	}
+	//turns the robot 180 turning left
+	public void turn180l(){
+		left.set(-.75);
+		right.set(-.75);
+		Timer.delay(1);
+		left.set(0);
+		right.set(0);
+	}
+	/**e
+	//turns the robot 180 turning right
+	private void turn180r(){
+		left.set(.75);
+		right.set(-.75);
+		Timer.delay(2);
+		left.set(0);
+		right.set(0);
+	}
+	 */
+}

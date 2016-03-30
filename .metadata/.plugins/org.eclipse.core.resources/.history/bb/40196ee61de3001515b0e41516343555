@@ -1,0 +1,123 @@
+/**
+ * 
+ * CODE FOR 2016
+ * 
+ * 
+ */
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+
+import com.ni.vision.NIVision;
+
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the IterativeRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the manifest file in the resource
+ * directory.
+ */
+public class Robot extends IterativeRobot {
+    /**
+     * This function is run when the robot is first started up and should be
+     * used for any initialization code.
+     */
+	
+	//values for controllers
+	int driveCtr0 = 0;
+	int driveCtr1 = 1;
+	int loadCtr = 2;
+	int shootCtr0 = 3;
+	int shootCtr1 = 4;
+	
+	//inputs and output classes
+	private Drive move;
+	private Shooter shoot;
+	private Loader load;
+	private Joystick joy1;
+	private Joystick joy2;
+	
+	//stuff for camera
+	Image frame;
+	int session;
+	
+	
+    public void robotInit() {
+    	//defining inputs and outputs upon startup
+    	move = new Drive(driveCtr0, driveCtr1);
+    	joy1 = new Joystick(0);
+    	joy2 = new Joystick(1);
+    	shoot = new Shooter(shootCtr0, shootCtr1);
+    	load = new Loader(loadCtr);
+    	
+    	//for camera
+    	frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+
+        // the camera name (ex "cam0") can be found through the roborio web interface
+        session = NIVision.IMAQdxOpenCamera("cam0",
+        NIVision.IMAQdxCameraControlMode.CameraControlModeController);
+        NIVision.IMAQdxConfigureGrab(session);
+        
+        
+    }
+
+    /**
+     * This function is called periodically during autonomous
+     * NOTE:THIS NEEDS TWEAKING	
+     */
+    public void autonomousPeriodic() {
+    	/*move.autoDrive(.75);
+    	Timer.delay(1);
+    	move.autoDrive(0);
+    	//turns x degrees, left is positive
+    	move.turn(90);
+    	move.autoDrive(.5);
+    	Timer.delay(.5);
+    	move.autoDrive(0);
+    	shoot.projectileLaunch(true);
+    	Timer.delay(.5);
+    	load.loadBall(.5);
+    	Timer.delay(.2);
+    	load.loadBall(0);
+    	shoot.projectileLaunch(false);
+    	*/
+    }
+
+    
+    public void telopInit(){
+    	NIVision.IMAQdxStartAcquisition(session);	
+    }
+    
+    /**
+     * This function is called periodically during operator control
+     */
+    public void teleopPeriodic() {
+    	//tell robot to move
+        move.drive(joy1.getY(), joy2.getY());
+        //if trigg is pressed, shoot
+        shoot.projectileLaunch(joy1.getTrigger());
+        //if but3, load in, if but 2, push out
+        load.loadBall(joy1.getRawButton(3),joy1.getRawButton(2));
+        //does some preset motions
+        move.preset(joy2.getRawButton(2), joy2.getRawButton(4), joy2.getRawButton(5));
+        
+        //for camera
+        NIVision.IMAQdxStartAcquisition(session);
+        NIVision.IMAQdxGrab(session, frame, 1);
+        CameraServer.getInstance().setImage(frame);
+        NIVision.IMAQdxStopAcquisition(session);
+        }
+    
+    //called when diabled
+    public void disabledInit(){
+    	NIVision.IMAQdxStopAcquisition(session);
+    }
+    
+    /**
+     * This function is called periodically during test mode
+     */
+    public void testPeriodic() {
+    
+    }
+    
+}

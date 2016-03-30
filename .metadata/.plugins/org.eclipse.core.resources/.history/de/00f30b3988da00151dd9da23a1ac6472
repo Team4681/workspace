@@ -1,0 +1,24 @@
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+
+public class Shooter {
+	private Victor s1;
+	private Victor s2;
+	private double speed = 1;
+	
+	public Shooter(){
+		s1 = new Victor(3);
+		s2 = new Victor(1);
+	}
+	
+	public void projectileLaunch(boolean triggered){
+		if(triggered){
+			s1.set(speed);
+			s2.set(-speed);
+		} else {
+			s1.set(0);
+			s2.set(0);
+		}
+	}
+}

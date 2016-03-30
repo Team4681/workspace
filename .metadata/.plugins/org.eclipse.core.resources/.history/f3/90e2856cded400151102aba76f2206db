@@ -1,0 +1,92 @@
+package org.usfirst.frc.team4681.robot;
+
+import edu.wpi.first.wpilibj.*;
+
+public class Drive {
+	//define motor controllers
+	private Victor left;
+	private Victor right;
+	
+	//variable to contain inputs (cuz screw calling joy.getX() every time)
+	private double xl;	//x of the left joy
+	private double xr;	//x of the right
+	
+	//constructor and init things
+	public Drive(){
+		left = new Victor(0);
+		right = new Victor(1);
+	}
+	
+	/*special function to allow better control of robot
+	basically squares the input (making it a smaller number b/c it is a decimal) while keeping sign
+	also creates a dead zone so it is not constantly jerking (magic square method)*/
+	private double adjust(double in){
+		if(in > .05){
+			return in*in;
+		} else if(in < -.05){
+			return -(in*in);
+		} else {
+			return 0;
+		}
+	}
+	
+	//let's go places!
+	//drives the robot
+	public void drive(double Left, double Right){
+		xl = Left;
+		xr = Right;
+		
+		//set motors to go at adjusted speed
+		left.set(adjust(xl));
+		right.set(adjust(xr));
+	}
+	//single joy-stick drive
+	public void altDrive(double x, double y){
+		left.set(adjust(y-x));
+		right.set(adjust(y+x));
+	}
+	
+	//use preset motions
+	public void preset(boolean b1, boolean b2, boolean b3){
+		if(b1) turn180l();
+		if(b2) turnr();
+		if(b3) turnl();
+		//if(b4) turn180r();
+		}
+	
+	/*helpful presets, time needs to be adjusted
+	quarter turn left*/
+	private void turnl(){
+		left.set(-.75);
+		right.set(.75);
+		Timer.delay(1);
+		left.set(0);
+		right.set(0);
+	}
+	//quarter turn right
+	private void turnr(){
+		left.set(.75);
+		right.set(-.75);
+		Timer.delay(1);
+		left.set(0);
+		right.set(0);
+	}
+	//turns the robot 180 turning left
+	private void turn180l(){
+		left.set(-.75);
+		right.set(.75);
+		Timer.delay(2);
+		left.set(0);
+		right.set(0);
+	}
+	/**
+	//turns the robot 180 turning right
+	private void turn180r(){
+		left.set(.75);
+		right.set(-.75);
+		Timer.delay(2);
+		left.set(0);
+		right.set(0);
+	}
+	 */
+}
