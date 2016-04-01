@@ -7,11 +7,11 @@
 package org.usfirst.frc.team4681.robot;
 
 import edu.wpi.first.wpilibj.*;
-
 import com.ni.vision.NIVision;
 import com.ni.vision.NIVision.DrawMode;
 import com.ni.vision.NIVision.Image;
 import com.ni.vision.NIVision.ShapeMode;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -26,9 +26,10 @@ public class Robot extends IterativeRobot {
      */
 	
 	//values to be set later
-	double distanceTo;
+	double distanceTo = 0;
 	boolean altCam;
 	boolean altCtrl;
+	boolean reverse = false;
 	
 	//values for controllers
 	int driveCtr0 = 0;
@@ -38,20 +39,21 @@ public class Robot extends IterativeRobot {
 	int shootCtr1 = 4;
 	
 	//inputs
-	String camIn0 = "cam0";
-	String camIn1 = "cam1";
-	/*
+	String camForward = "cam0";
+	String camReverse = "cam2";
+	
 	int rangeSensorIn = 0;
 	
 	//range sensor
-	Ultrasonic rangeIn = new Ultrasonic(1,rangeSensorIn);
-	*/
+	AnalogInput rangeIn = new AnalogInput(rangeSensorIn);
+	
 	//inputs and output classes
 	private Drive move;
 	private Shooter shoot;
 	private Loader load;
 	private Joystick joy1;
 	private Joystick joy2;
+	CameraServer camera = CameraServer.getInstance(); 
 	
 	//stuff for camera (most of it was copy and pasted last minute, need to take time to understand later)
 	Image frame;
@@ -67,14 +69,8 @@ public class Robot extends IterativeRobot {
     	load = new Loader(loadCtr);
     	
     	//for camera
-    	frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
-    	altCam = false;
-    	
-    	session0 = NIVision.IMAQdxOpenCamera(camIn0,NIVision.IMAQdxCameraControlMode.CameraControlModeController);
-        NIVision.IMAQdxConfigureGrab(session0);
-        
-        //define a rectangle for aiming purposes
-        NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+    	camera.setQuality(50);
+    	camera.startAutomaticCapture("cam0");
 
     }
 
@@ -98,32 +94,39 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
    public void teleopPeriodic() {
-
-   		NIVision.IMAQdxStartAcquisition(session0);
-    	//attempt at getting around roboRio warnings for camera, completely separates the two cameras into one instance
-    	//if(joy2.getRawButton(6)){
-    		//NIVision.IMAQdxStopAcquisition(session0);
-    		
-            
-    	//} else if(joy2.getRawButton(7)){
-    		//NIVision.IMAQdxStopAcquisition(session0);
-    		//session0 = NIVision.IMAQdxOpenCamera(camIn1,NIVision.IMAQdxCameraControlMode.CameraControlModeController);
-           // NIVision.IMAQdxConfigureGrab(session0);
-    		//NIVision.IMAQdxStartAcquisition(session0);
-    	// }
-    	
-    	
-    	//distanceTo = getRange();
-    	//tell robot to move
-    	if (joy1.getRawButton(10)){
-    		altCtrl = false;
-    	} else if(joy1.getRawButton(11)) {
-    		altCtrl = true;
+	   
+   		distanceTo = getRange();
+   		if(distanceTo < 0) distanceTo = 0;
+   		if(distanceTo > 5) distanceTo = 5;
+   		SmartDashboard.putNumber("DB/Slider 0", distanceTo);
+   		//debug code
+   		SmartDashboard.putNumber("DB/Slider 1", rangeIn.getVoltage());
+	   //button to switch direction of the robot (camera and drive)
+    	if(joy2.getRawButton(4) && !reverse){
+    		reverse = true;
+    		/*camera = null;
+    		camera = CameraServer.getInstance();
+    		camera.setQuality(50);
+    	    camera.startAutomaticCapture(camReverse);
+    		*/
     	}
-    	if(!altCtrl){
-    		move.drive(joy1.getY(), joy2.getY(), joy2.getTrigger());
+    	if(joy2.getRawButton(5) && reverse){
+    		reverse = false;
+    		/*camera = null;
+    		camera = CameraServer.getInstance();
+    		camera.setQuality(50);
+    	    camera.startAutomaticCapture(camForward);
+    		*/
+    	}
+    	
+    	
+    	
+    	//to move, if reverse, controls are switched
+    	if(reverse){
+    		move.drive(-joy2.getY(), -joy1.getY(), joy2.getTrigger());    		
     	} else {
-    		move.altDrive(joy1.getY(), joy1.getX());
+    		move.drive(joy1.getY(), joy2.getY(), joy2.getTrigger());
+
     	}
     	//plays with shooting speed value
     	shoot.changeSpeed(joy2.getRawButton(11), joy2.getRawButton(10));
@@ -134,14 +137,9 @@ public class Robot extends IterativeRobot {
         //if but3, load in, if but 2, push out
         load.loadBall(joy1.getRawButton(3),joy1.getRawButton(2));
         
-        //for camera
-        NIVision.IMAQdxGrab(session0, frame, 1);
-        NIVision.imaqDrawShapeOnImage(frame, frame, rect, DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
-        CameraServer.getInstance().setImage(frame);
-        NIVision.IMAQdxStopAcquisition(session0);
    }
     
-    //called when diabled
+    //called when disabled
     public void disabledInit(){
     	
     }
@@ -154,8 +152,8 @@ public class Robot extends IterativeRobot {
     }
     
     //returns the range sensor input as meters
-    /*public double getRange(){
-    	return rangeIn.getRangeMM()/1000;
+    public double getRange(){
+    	return (rangeIn.getVoltage()/.997);
     }
-    */
+    
 }
